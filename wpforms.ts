@@ -320,10 +320,22 @@ class AutoCacheForm {
   }
 
   /**
+   * Adds an event listener to the "submit" button that will reset the cookies.
+   */
+  private addEventToSubmitButton() {
+    const submitButton = AutoCacheForm.$("//button[@type='submit']")[0];
+
+    submitButton.addEventListener("change", () => {
+      this.inputValues = {};
+      this.saveCookie();
+    });
+  }
+
+  /**
    * Adds and event listener to all input elements that will save the form whenever
    * an element calls the "change" event.
    */
-  addEventToInputElements() {
+  private addEventToInputElements() {
     const allInputElements = this.getAllFormInputElements();
     for (const inputElement of allInputElements) {
       inputElement.addEventListener("change", () => {
