@@ -157,6 +157,11 @@ class AutoCacheForm {
   private inputValues: Record<string, string> = {};
 
   /**
+   * The css querry of the waiting indicators.
+   */
+  public waitingIndicatorCssSelector = "#formularTestamentWaiting"
+
+  /**
    * If set true the class will save the form data using an interval.
    */
   reloadInInterval = false;
@@ -185,6 +190,7 @@ class AutoCacheForm {
       this.loadForm();
       this.addEventToInputElements();
       this.addEventToNextButtons();
+      this.addEventToSubmitButton();
     }, 200);
   }
 
@@ -219,18 +225,51 @@ class AutoCacheForm {
    * Saves the form in the cookies.
    */
   public async saveForm() {
-    const formInputElements = this.getAllFormInputElements();
+    this.showWaitingIndicator();
 
-    for (const formInputElement of formInputElements as Array<Element>) {
-      let value = this.readInputValue(formInputElement);
+    setTimeout(() => {
+      const formInputElements = this.getAllFormInputElements();
 
-      if (value === "" || value == null || value == false) {
-        value = undefined;
+      for (const formInputElement of formInputElements as Array<Element>) {
+        let value = this.readInputValue(formInputElement);
+
+        if (value === "" || value == null || value == false) {
+          value = undefined;
+        }
+        this.inputValues[formInputElement.id] = value;
       }
-      this.inputValues[formInputElement.id] = value;
-    }
 
-    this.saveCookie();
+      this.saveCookie();
+
+      this.hideWaitingIndicator();
+    }, 100)
+  }
+
+  /**
+   * Shows all the waiting indicator. Queries the waiting indicator by its css querry and displays them.
+   * 
+   * <p>
+   * Requires the page to have waiting indicators by the querry and requires the waiting indicators to not be visible.
+   * </p>
+   * 
+   */
+  public showWaitingIndicator() {
+    const elements = Array.from(document.querySelectorAll(this.waitingIndicatorCssSelector)) as Array<HTMLElement>;
+
+    elements.forEach(element => element.style.visibility = "visible");
+  }
+
+  /**
+   * Hides all the waiting indicator. Queries the waiting indicator by its css querry and hides them.
+   * 
+   * <p>
+   * Requires the page to have waiting indicators by the querry.
+   * </p>
+   */
+  public hideWaitingIndicator() {
+    const elements = Array.from(document.querySelectorAll(this.waitingIndicatorCssSelector)) as Array<HTMLElement>;
+
+    elements.forEach(element => element.style.visibility = "hidden");
   }
 
   /**
@@ -342,15 +381,6 @@ class AutoCacheForm {
         this.saveForm();
       });
     }
-  }
-
-  /**
-   * Identifies the id of the form by reading the suffix of the wpforms-form-* id.
-   *
-   * @return the id of the form.
-   */
-  private getFormId(): string {
-    return "";
   }
 
   /**

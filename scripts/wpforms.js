@@ -91,6 +91,10 @@ class AutoCacheForm {
          */
         this.inputValues = {};
         /**
+         * The css querry of the waiting indicators.
+         */
+        this.waitingIndicatorCssSelector = "#formularTestamentWaiting";
+        /**
          * If set true the class will save the form data using an interval.
          */
         this.reloadInInterval = false;
@@ -154,6 +158,7 @@ class AutoCacheForm {
             this.loadForm();
             this.addEventToInputElements();
             this.addEventToNextButtons();
+            this.addEventToSubmitButton();
         }, 200);
     }
     /**
@@ -168,33 +173,66 @@ class AutoCacheForm {
      * Reloads the form from the cookies.
      */
     loadForm() {
-        const inputValues = this.loadCookies();
-        if (inputValues.trim() === "") {
-            this.inputValues = {};
-        }
-        else {
-            this.inputValues = JSON.parse(inputValues);
-        }
-        for (const [id, value] of Object.entries(this.inputValues)) {
-            const element = AutoCacheForm.$(`.//*[@id='${id}']`, this.formElement)[0];
-            this.setInputValue(element, value);
-        }
+        this.showWaitingIndicator();
+
+        setTimeout(() => {
+            const inputValues = this.loadCookies();
+            if (inputValues.trim() === "") {
+                this.inputValues = {};
+            }
+            else {
+                this.inputValues = JSON.parse(inputValues);
+            }
+            for (const [id, value] of Object.entries(this.inputValues)) {
+                const element = AutoCacheForm.$(`.//*[@id='${id}']`, this.formElement)[0];
+                this.setInputValue(element, value);
+            }
+
+            this.hideWaitingIndicator();
+        }, 100);
     }
     /**
      * Saves the form in the cookies.
      */
     saveForm() {
         return __awaiter(this, void 0, void 0, function* () {
-            const formInputElements = this.getAllFormInputElements();
-            for (const formInputElement of formInputElements) {
-                let value = this.readInputValue(formInputElement);
-                if (value === "" || value == null || value == false) {
-                    value = undefined;
+            this.showWaitingIndicator();
+            setTimeout(() => {
+                const formInputElements = this.getAllFormInputElements();
+                for (const formInputElement of formInputElements) {
+                    let value = this.readInputValue(formInputElement);
+                    if (value === "" || value == null || value == false) {
+                        value = undefined;
+                    }
+                    this.inputValues[formInputElement.id] = value;
                 }
-                this.inputValues[formInputElement.id] = value;
-            }
-            this.saveCookie();
+                this.saveCookie();
+                this.hideWaitingIndicator();
+            }, 100);
         });
+    }
+    /**
+     * Shows all the waiting indicator. Queries the waiting indicator by its css querry and displays them.
+     *
+     * <p>
+     * Requires the page to have waiting indicators by the querry and requires the waiting indicators to not be visible.
+     * </p>
+     *
+     */
+    showWaitingIndicator() {
+        const elements = Array.from(document.querySelectorAll(this.waitingIndicatorCssSelector));
+        elements.forEach(element => element.style.visibility = "visible");
+    }
+    /**
+     * Hides all the waiting indicator. Queries the waiting indicator by its css querry and hides them.
+     *
+     * <p>
+     * Requires the page to have waiting indicators by the querry.
+     * </p>
+     */
+    hideWaitingIndicator() {
+        const elements = Array.from(document.querySelectorAll(this.waitingIndicatorCssSelector));
+        elements.forEach(element => element.style.visibility = "hidden");
     }
     /**
      * Reads the value of an content and returns it.
