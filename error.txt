@@ -1,1 +1,0 @@
-Warning: Illegal string offset 'primary' in /var/www/vhosts/vonbuttlar.com/preprod.vonbuttlar.com/wp-content/plugins/wpforms/includes/fields/class-email.php on line 543

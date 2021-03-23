@@ -84,6 +84,10 @@ class AutoCacheForm {
         this.cookieExpireDate = 360 * 24 * 60 * 60 * 1000;
         /**
          * The name of the cookie.
+         *
+         * <p>
+         * You probably want to change this name in order to add this script to multiple pages.
+         * </p>
          */
         this.cookieName = "wpfromscache";
         /**
@@ -319,6 +323,8 @@ class AutoCacheForm {
 }
 const form = AutoCacheForm.$("//form[@id[contains(.,'wpforms-form')]]")[0];
 const testamentForm = new AutoCacheForm(form);
+// This will ensure a unique cookie name to prevent collisions.
+testamentForm.cookieName = "wpformscache-" + form.id;
 // Uncomment to add an interval that automatically saves the form every 5 seconds.
 // testamentForm.reloadInInterval = true;
 testamentForm.setup();
